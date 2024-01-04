@@ -3,7 +3,7 @@ var lat;
 var lon;
 var userHistory = [];
 
-// search 
+// Handling form submission
 document.getElementById("search-form").addEventListener("submit", function (event) {
     event.preventDefault();
     event.stopPropagation();
@@ -32,11 +32,11 @@ function fetchData() {
                     return response.json();
                 })
                 .then(function (data) {
-                    locationAndDate()
+                    locationDateWeather()
                     appendHistory()
                     console.log(data)
 
-                    // gathers user's search history capped at 5
+                    // ----------------- Search History ----------------
                     if (userHistory.length < 5) {
                         userHistory.push(data.city.name);
                     } else {
@@ -44,20 +44,29 @@ function fetchData() {
                         userHistory.push(data.city.name);
                     }
 
-                    // appends searched city name and current date to header 
-                    function locationAndDate() {
+                    // --------------- Current city weather data ---------------
+                    function locationDateWeather() {
+                        // Clears Results
                         $("#today").empty()
+                        //date
                         var todayDate = dayjs().format("D/M/YYYY");
                         cityDateContainer = $("<h1>")
+                        //date and name
                         cityDateContainer.text((data.city.name) + " (" + todayDate + ")");
-                        $("#today").append(cityDateContainer);
+                        //icon
+                        iconCode = (data.list[0].weather[0].icon);
+                        iconContainer = $("<img>").attr("src", "https://openweathermap.org/img/wn/"+ iconCode + "@2x.png")
+                        // appends all to header
+                        $("#today").append(cityDateContainer, iconContainer);
                     }
 
-                    // saves each to local storage
-                    for (let i = 0; i < userHistory.length; i++) {;
+                    // -------------- Saving to Local Storage -------------
+                    for (let i = 0; i < userHistory.length; i++) {
+                        ;
                         localStorage.setItem("result" + i, userHistory[i]);
                     }
 
+                    // ----------- Weather Data --------------
                     // temperature
                     var temp = (data.list[0].main.temp);
                     tempContainer = $("<h3>");
@@ -75,6 +84,7 @@ function fetchData() {
                     humidityContainer = $("<h3>");
                     humidityContainer.text("Humidity: " + humidity + "%");
                     $("#today").append(humidityContainer);
+
                 });
         });
 };
