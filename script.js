@@ -16,7 +16,7 @@ document.getElementById("search-form").addEventListener("submit", function (even
 
 function fetchData() {
     // geocoder to turn city name into lat and lon coordinates
-    var geocodingURL = "http://api.openweathermap.org/geo/1.0/direct?q=" + input + "&limit=1&appid=f237ee47155c423e2a0250df610441f7"
+    var geocodingURL = "https://api.openweathermap.org/geo/1.0/direct?q=" + input + "&limit=1&appid=f237ee47155c423e2a0250df610441f7"
     fetch(geocodingURL)
         .then(function (response) {
             return response.json();
@@ -27,7 +27,7 @@ function fetchData() {
             lon = JSON.stringify(data[0].lon);
 
             // API call for city data
-            var queryURL = "http://api.openweathermap.org/data/2.5/forecast?lat=" + lat + "&lon=" + lon + "&units=metric&appid=f237ee47155c423e2a0250df610441f7"
+            var queryURL = "https://api.openweathermap.org/data/2.5/forecast?lat=" + lat + "&lon=" + lon + "&units=metric&appid=f237ee47155c423e2a0250df610441f7"
             fetch(queryURL)
                 .then(function (response) {
                     return response.json();
