@@ -2,6 +2,8 @@ var input;
 var lat;
 var lon;
 var userHistory = [];
+// container 
+var weatherCard = $("<div>").addClass("border border-dark p-3").attr("id", "weatherCard");
 
 // Handling form submission
 document.getElementById("search-form").addEventListener("submit", function (event) {
@@ -20,7 +22,6 @@ function fetchData() {
             return response.json();
         })
         .then(function (data) {
-
             // getting the lat and lon data for API call
             lat = JSON.stringify(data[0].lat);
             lon = JSON.stringify(data[0].lon);
@@ -32,11 +33,11 @@ function fetchData() {
                     return response.json();
                 })
                 .then(function (data) {
-                    locationDateWeather()
-                    appendHistory()
-                    console.log(data)
 
-                    // ----------------- Search History ----------------
+                    locationDateWeather();
+                    appendHistory();
+
+                    // --------- Search History ----------
                     if (userHistory.length < 5) {
                         userHistory.push(data.city.name);
                     } else {
@@ -44,58 +45,144 @@ function fetchData() {
                         userHistory.push(data.city.name);
                     }
 
-                    // --------------- Current city weather data ---------------
+
+                    // ------ Current city weather data ------
                     function locationDateWeather() {
-                        // Clears Results
-                        $("#today").empty()
+                        // Clears previous results
+                        $("#weatherCard").empty();
+                        $("#today").empty();
+                        $("#forecast").empty();
+
                         //date
                         var todayDate = dayjs().format("D/M/YYYY");
                         cityDateContainer = $("<h1>")
+
                         //date and name
                         cityDateContainer.text((data.city.name) + " (" + todayDate + ")");
+
                         //icon
                         iconCode = (data.list[0].weather[0].icon);
-                        iconContainer = $("<img>").attr("src", "https://openweathermap.org/img/wn/"+ iconCode + "@2x.png")
+                        iconContainer = $("<img>").attr("src", "https://openweathermap.org/img/wn/" + iconCode + "@2x.png")
+
                         // appends all to header
-                        $("#today").append(cityDateContainer, iconContainer);
+                        weatherCard.append(cityDateContainer, iconContainer);
+
+
+                        // ------- Saving to Local Storage -------
+                        for (let i = 0; i < userHistory.length; i++) {
+                            localStorage.setItem("result" + i, userHistory[i]);
+                        }
+
+
+                        // ----------- Weather Data --------------
+                        // temperature
+                        var temp = (data.list[0].main.temp);
+                        tempContainer = $("<h3>");
+                        tempContainer.text("Temp: " + temp + "C").addClass("mb-3");
+                        weatherCard.append(tempContainer);
+
+                        // wind
+                        var windy = (data.list[0].wind.speed);
+                        windContainer = $("<h3>");
+                        windContainer.text("Wind: " + windy + "KPH").addClass("mb-3");
+                        weatherCard.append(windContainer);
+
+                        // humidity
+                        var humidity = (data.list[0].main.humidity);
+                        humidityContainer = $("<h3>");
+                        humidityContainer.text("Humidity: " + humidity + "%").addClass("mb-3");
+                        weatherCard.append(humidityContainer);
+
+                        $("#today").append(weatherCard);
                     }
 
-                    // -------------- Saving to Local Storage -------------
-                    for (let i = 0; i < userHistory.length; i++) {
-                        ;
-                        localStorage.setItem("result" + i, userHistory[i]);
+
+                    // ------------- 5 day forecast -------------
+
+                    // make 5 calls to the future weather function
+                    for (let index = 1; index < 6; index++) {
+
+                        // set desired day in YYYY-MM-DD
+                        var futureDate = dayjs().add([index], "day").format("YYYY-MM-DD");
+                        futureWeather()
                     }
+                    function futureWeather() {
+                        // filter data responses that includes desired day
+                        var findData = (data.list).filter(item => item.dt_txt.includes(futureDate));
 
-                    // ----------- Weather Data --------------
-                    // temperature
-                    var temp = (data.list[0].main.temp);
-                    tempContainer = $("<h3>");
-                    tempContainer.text("Temp: " + temp + "C");
-                    $("#today").append(tempContainer);
+                        // Create card
+                        var fiveDayContainer = $("<div>").addClass("col")
+                        var forecastCard = $("<div>").addClass("card bg-dark text-light p-3 mb-5");
 
-                    // wind
-                    var windy = (data.list[0].wind.speed);
-                    windContainer = $("<h3>");
-                    windContainer.text("Wind: " + windy + "KPH");
-                    $("#today").append(windContainer);
+                        // date 
+                        futureDateContainer = $("<h3>")
+                        futureDateContainer.text(dayjs(futureDate).format("D/M/YYYY"))
+                        forecastCard.append(futureDateContainer)
+                        //icon
+                        futureIconCode = (findData[4].weather[0].icon);
+                        futureIconContainer = $("<img>").attr("src", "https://openweathermap.org/img/wn/" + iconCode + "@2x.png")
+                        forecastCard.append(futureIconContainer)
 
-                    // humidity
-                    var humidity = (data.list[0].main.humidity);
-                    humidityContainer = $("<h3>");
-                    humidityContainer.text("Humidity: " + humidity + "%");
-                    $("#today").append(humidityContainer);
+                        // temperature
+                        var futureTemp = (findData[4].main.temp);
+                        futureTempContainer = $("<h4>");
+                        futureTempContainer.text("Temp: " + futureTemp + "C").addClass("mb-3");
+                        forecastCard.append(futureTempContainer);
+
+                        // wind
+                        var futureWindy = (findData[4].wind.speed);
+                        futureWindContainer = $("<h4>");
+                        futureWindContainer.text("Wind: " + futureWindy + "KPH").addClass("mb-3");
+                        forecastCard.append(futureWindContainer);
+
+                        // humidity
+                        var futureHumidity = (findData[4].main.humidity);
+                        futureHumidityContainer = $("<h4>");
+                        futureHumidityContainer.text("Humidity: " + futureHumidity + "%").addClass("mb-3");
+                        forecastCard.append(futureHumidityContainer);
+                        fiveDayContainer.append(forecastCard)
+                        $("#forecast").append(fiveDayContainer);
+                    };
 
                 });
         });
+
 };
 
 function appendHistory() {
     $("#history").empty()
     for (let i = 0; i < userHistory.length; i++) {
-        var historyResult = $("<h3>");
-        historyResult.text(userHistory[i]).attr("id", "result" + i);
-        $("#history").append(historyResult);
+        // render as button
+        if (userHistory[i] === "null") {
+            userHistory[i] = "";
+        } else {
+            var historyResult = $("<button>").addClass("btn btn-secondary btn-lg").attr("id", "button");
+            historyResult.text(userHistory[i]).attr("id", "result" + i);
+            $("#history").append(historyResult);
+        }
     }
+
+    // onclick for history to go through geocoder as value of the city name
+    document.getElementById("result0").addEventListener("click", function () {
+        input = document.getElementById("result0").innerText;
+        fetchData();
+    });
+    document.getElementById("result1").addEventListener("click", function () {
+        input = document.getElementById("result1").innerText;
+        fetchData();
+    });
+    document.getElementById("result2").addEventListener("click", function () {
+        input = document.getElementById("result2").innerText;
+        fetchData();
+    });
+    document.getElementById("result3").addEventListener("click", function () {
+        input = document.getElementById("result3").innerText;
+        fetchData();
+    });
+    document.getElementById("result4").addEventListener("click", function () {
+        input = document.getElementById("result4").innerText;
+        fetchData();
+    });
 }
 
 // gets history from local storage
