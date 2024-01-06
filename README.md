@@ -16,8 +16,8 @@ Link: https://kaiwright.github.io/weatherDashboard/
 
 The website deploys from the link above. 
 
-![ Picture of the empty planner](weatherDashboard1.PNG)
-![ Picture of the filled in planner](weatherDashboard2.PNG)
+![ Picture of the weather dashboard when first loaded](./assets/weatherDashboard1.PNG)
+![ Picture of the weather dashboard with results](./assets/weatherDashboard2.PNG)
 
 ## License
 
